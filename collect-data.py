@@ -1,10 +1,25 @@
 import cv2
 import csv
 import mediapipe as mp
+from collections import deque
 
 mp_hands = mp.solutions.hands
+mp_drawing_styles = mp.solutions.drawing_styles
 hands = mp_hands.Hands()
+mp_drawing = mp.solutions.drawing_utils
 cap = cv2.VideoCapture(0)
+
+def normalize_landmarks(hand_landmarks):
+    landmarks = []
+
+    base_x = hand_landmarks.landmark[0].x
+    base_y = hand_landmarks.landmark[0].y
+
+    for lm in hand_landmarks.landmark:
+        landmarks.append(lm.x - base_x)
+        landmarks.append(lm.y - base_y)
+
+    return landmarks
 
 label = input("Enter gesture label (e.g. fist, peace): ")
 
@@ -22,15 +37,37 @@ with open("gesture-data.csv", "a", newline="") as f:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         if results.multi_hand_landmarks:
-            hand_landmarks = results.multi_hand_landmarks[0]
+            for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                
+                # Draws the landmarks 
+                mp_drawing.draw_landmarks(
+                        image, 
+                        hand_landmarks, 
+                        mp_hands.HAND_CONNECTIONS,
+                        mp_drawing_styles.get_default_hand_landmarks_style(),
+                        mp_drawing_styles.get_default_hand_connections_style()
+                        
+                    )
+                # Extract the drawing landmarks
+                landmarks = normalize_landmarks(hand_landmarks)    
 
-            landmarks = []
-            for lm in hand_landmarks.landmark:
-                landmarks.extend([lm.x, lm.y])
+                # Gets Right/left Label
+                hand_label = results.multi_handedness[idx].classification[0].label
 
-            cv2.putText(image, "Press S to save", (10, 40), 
+                # Combine text
+                display_text = f"{hand_label}:"
+
+                # Positioning of text
+                r, l, _ = image.shape
+                x = int(hand_landmarks.landmark[0].x * r)
+                y = int(hand_landmarks.landmark[0].y * l)
+
+                cv2.putText(image, display_text, (x - 40, y - 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                
+                cv2.putText(image, "Press S to save", (10, 40), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            
+                
             if cv2.waitKey(1) & 0xFF == ord('s'):
                 write.writerow(landmarks + [label])
                 print(f"Saved {label}")
