@@ -49,32 +49,46 @@ while cap.isOpened():
                     
                 )
             # Extract the drawing landmarks
-            landmarks = normalize_landmarks(hand_landmarks)    
+            landmarks = normalize_landmarks(hand_landmarks)
 
-            # Prediction of the gesture
-            prediction = model.predict([landmarks])[0]
+            # Get probabilities
+            probs = model.predict_proba([landmarks])[0]
+            confidence = max(probs)
 
-            prediction_buffer.append(prediction)
+            # Get predicted label
+            prediction = model.classes_[probs.argmax()]
 
-            final_prediction = max(
-                set(prediction_buffer),
-                key=prediction_buffer.count
-            )
+            if confidence > 0.6:
+                prediction_buffer.append(prediction)
+
+            # Majority vote
+            if len(prediction_buffer) > 0:
+                final_prediction = max(
+                    set(prediction_buffer),
+                    key=prediction_buffer.count
+                )
+            else:
+                final_prediction = "Detecting..."    
 
             # Gets Right/left Label
             hand_label = results.multi_handedness[idx].classification[0].label
 
             # Combine text
             display_text = f"{hand_label}: {final_prediction}"
+            print(display_text)
+
 
             # Positioning of text
-            r, l, _ = image.shape
-            x = int(hand_landmarks.landmark[0].x * r)
-            y = int(hand_landmarks.landmark[0].y * l)
+            w, h, _ = image.shape
+            if hand_label == "Left":
+                text_x, text_y = 30, 40                 # Top-left
+            else:
+                text_x, text_y = w - 150, 40            # Top-right
 
-            cv2.putText(image, display_text, (x - 40, y - 20),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-            
+
+            cv2.putText(image, display_text, (text_x, text_y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
     cv2.imshow("Gesture Recognition", image)
 
     if cv2.waitKey(1) & 0xFF == 27:
