@@ -25,12 +25,14 @@ To run this project, you need the following software and libraries installed:
 ## 3. Installation Steps
 
 **Step 1: Install Python**
+
 Make sure Python is installed on your system. You can check by running:
 ```
 python --version
 ```
 
 **Step 2: Intall required Libraries**
+
 Run this following commands in your terminal:
 ```
 pip install opencv-python
@@ -73,7 +75,8 @@ pip install joblib
 
 ## 5. How to Run the Program
 
-*Step 1: Collect Gesture Data*
+**Step 1: Collect Gesture Data**
+
 Run this if you do not have a dataset or want to add new gestures:
 ```
 python collect-data.py
@@ -84,6 +87,7 @@ python collect-data.py
 - This will create the `gesture-data.csv` file for the gesture.
 
 **Step 2: Train the Model**
+
 After collecting data, train the model:
 ```
 python train-data.py
@@ -91,6 +95,7 @@ python train-data.py
 - This will create `gesture_model.pkl`
 
 **Step 3: Run the Gesture Recognition**
+
 Finnaly, run the gesture recognizer:
 ```
 python gesture-recognizer.py
