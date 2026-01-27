@@ -1,7 +1,6 @@
 import cv2
 import mediapipe as mp
 import joblib
-import numpy as np
 from collections import deque
 
 model = joblib.load("gesture_model.pkl")
@@ -68,7 +67,7 @@ while cap.isOpened():
                     key=prediction_buffer.count
                 )
             else:
-                final_prediction = "Detecting..."    
+                final_prediction = "Detecting..." 
 
             # Gets Right/left Label
             hand_label = results.multi_handedness[idx].classification[0].label
