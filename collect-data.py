@@ -1,7 +1,7 @@
 import cv2
 import csv
 import mediapipe as mp
-from collections import deque
+
 
 mp_hands = mp.solutions.hands
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -49,6 +49,7 @@ with open("gesture-data.csv", "a", newline="") as f:
                         mp_drawing_styles.get_default_hand_connections_style()
                         
                     )
+                
                 # Extract the drawing landmarks
                 landmarks = normalize_landmarks(hand_landmarks)    
 
