@@ -3,95 +3,101 @@ import mediapipe as mp
 import joblib
 from collections import deque
 
-model = joblib.load("gesture_model.pkl")
+def recognizer():
 
-mp_hands = mp.solutions.hands
-mp_drawing_styles = mp.solutions.drawing_styles
-hands = mp_hands.Hands()
-mp_drawing = mp.solutions.drawing_utils
+    model = joblib.load("gesture_model.pkl")
 
-cap = cv2.VideoCapture(0)
+    mp_hands = mp.solutions.hands
+    mp_drawing_styles = mp.solutions.drawing_styles
+    hands = mp_hands.Hands()
+    mp_drawing = mp.solutions.drawing_utils
 
-prediction_buffer = deque(maxlen=7)
+    cap = cv2.VideoCapture(0)
 
-def normalize_landmarks(hand_landmarks):
-    landmarks = []
+    prediction_buffer = deque(maxlen=7)
 
-    base_x = hand_landmarks.landmark[0].x
-    base_y = hand_landmarks.landmark[0].y
+    def normalize_landmarks(hand_landmarks):
+        landmarks = []
 
-    for lm in hand_landmarks.landmark:
-        landmarks.append(lm.x - base_x)
-        landmarks.append(lm.y - base_y)
+        base_x = hand_landmarks.landmark[0].x
+        base_y = hand_landmarks.landmark[0].y
 
-    return landmarks
+        for lm in hand_landmarks.landmark:
+            landmarks.append(lm.x - base_x)
+            landmarks.append(lm.y - base_y)
 
-while cap.isOpened():
-    success, image = cap.read()
-    if not success:
-        continue
+        return landmarks
 
-    image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-    results = hands.process(image)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    while cap.isOpened():
+        success, image = cap.read()
+        if not success:
+            continue
 
-    if results.multi_hand_landmarks:
-        for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
-            
-            # Draws the landmarks 
-            mp_drawing.draw_landmarks(
-                    image, 
-                    hand_landmarks, 
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style()
-                    
-                )
-            # Extract the drawing landmarks
-            landmarks = normalize_landmarks(hand_landmarks)
+        image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+        results = hands.process(image)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-            # Get probabilities
-            probs = model.predict_proba([landmarks])[0]
-            confidence = max(probs)
+        if results.multi_hand_landmarks:
+            for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                
+                # Draws the landmarks 
+                mp_drawing.draw_landmarks(
+                        image, 
+                        hand_landmarks, 
+                        mp_hands.HAND_CONNECTIONS,
+                        mp_drawing_styles.get_default_hand_landmarks_style(),
+                        mp_drawing_styles.get_default_hand_connections_style()
+                        
+                    )
+                # Extract the drawing landmarks
+                landmarks = normalize_landmarks(hand_landmarks)
 
-            # Get predicted label
-            prediction = model.classes_[probs.argmax()]
+                # Get probabilities
+                probs = model.predict_proba([landmarks])[0]
+                confidence = max(probs)
 
-            if confidence > 0.6:
-                prediction_buffer.append(prediction)
+                # Get predicted label
+                prediction = model.classes_[probs.argmax()]
 
-            # Majority vote
-            if len(prediction_buffer) > 0:
-                final_prediction = max(
-                    set(prediction_buffer),
-                    key=prediction_buffer.count
-                )
-            else:
-                final_prediction = "Detecting..." 
+                if confidence > 0.6:
+                    prediction_buffer.append(prediction)
 
-            # Gets Right/left Label
-            hand_label = results.multi_handedness[idx].classification[0].label
+                # Majority vote
+                if len(prediction_buffer) > 0:
+                    final_prediction = max(
+                        set(prediction_buffer),
+                        key=prediction_buffer.count
+                    )
+                else:
+                    final_prediction = "Detecting..." 
 
-            # Combine text
-            display_text = f"{hand_label}: {final_prediction}"
-            print(display_text)
+                # Gets Right/left Label
+                hand_label = results.multi_handedness[idx].classification[0].label
 
-
-            # Positioning of text
-            w, h, _ = image.shape
-            if hand_label == "Left":
-                text_x, text_y = 30, 40                 # Top-left
-            else:
-                text_x, text_y = w - 150, 40            # Top-right
+                # Combine text
+                display_text = f"{hand_label}: {final_prediction}"
+                print(display_text)
 
 
-            cv2.putText(image, display_text, (text_x, text_y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                # Positioning of text
+                w, h, _ = image.shape
+                if hand_label == "Left":
+                    text_x, text_y = 30, 40                 # Top-left
+                else:
+                    text_x, text_y = w - 150, 40            # Top-right
 
-    cv2.imshow("Gesture Recognition", image)
 
-    if cv2.waitKey(1) & 0xFF == 27:
-        break
+                cv2.putText(image, display_text, (text_x, text_y),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-cap.release()
-cv2.destroyAllWindows()
+        cv2.imshow("Gesture Recognition", image)
+
+        if cv2.waitKey(1) & 0xFF == 27:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+    pass
+
+if __name__ == "__main__":
+    recognizer()
