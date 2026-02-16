@@ -14,32 +14,49 @@ To run this project, you need the following software and libraries installed:
 - Webcam (built-in or external)
 
 **Python Libraries**
-- opencv-python
-- mediapipe
-- scikit-learn
-- joblib
-- deque
+- See `requirements.txt` for exact versions:
+    - mediapipe
+    - opencv-python
+    - scikit-learn
+    - joblib
+    - numpy
+    - pandas
+    - matplotlib
+    - (and others included in `requirements.txt`)
 
 ---
 
 ## 3. Installation Steps
 
-**Step 1: Install Python**
+**Step 1: Clone the Repository**
 
 Make sure Python is installed on your system. You can check by running:
 ```
 python --version
 ```
+after that you can clone the repo by doing:
 
-**Step 2: Intall required Libraries**
+```
+git clone <repo-url>
+cd <project-folder>
+```
 
+**Step 2: Create a Virtual Environment**
 Run this following commands in your terminal:
 ```
-pip install opencv-python
-pip install mediapipe
-pip install scikit-learn
-pip install joblib
+python venv venv
 ```
+
+**Step 3: Create a Virtual Environment**
+```
+venv\Scripts\activate
+```
+
+**Step 4: Install Required Libraries**
+```
+pip install -r requirements.txt
+```
+This will install all the required dependencies with compatible versions.
 
 ---
 
