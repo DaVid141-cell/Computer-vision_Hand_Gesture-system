@@ -70,21 +70,20 @@ def collect():
 
                     cv2.putText(image, display_text, (x - 40, y - 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-                    
-                    cv2.putText(image, "Press S to save", (10, h - 60), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
-                    
-                    cv2.putText(image, "Press C to create new", (10, h - 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                    cv2.putText(image, "Press S to save the data", (10, h - 50), 
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+                    cv2.putText(image, "Press C to create new data", (10, h - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+                    cv2.putText(image, "Press ESC to exit", (10, h - 80),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1),
                 
-                    
                 if key == ord('s'):
                     write.writerow(landmarks + [label])
                     print(f"Saved {label} ({hand_label})")
                 elif key == ord('c'):
                     label = input("Enter New Gesture label: ")
                     print("Swicthed to label: {label}")
-            
+
             elif key == 27:
                 break
             
